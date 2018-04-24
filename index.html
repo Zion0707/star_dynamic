@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>test</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+	<script type="text/javascript">
+
+		var ani_img = new Image();
+        ani_img.src = "t.png";
+
+		window.onload = function(){
+			var canvas = document.getElementById('canvas');
+
+			var canvas_w = window.innerWidth;
+			var canvas_h = window.innerHeight;
+
+			var ctx = canvas.getContext('2d');
+
+			var target_x = canvas_w/2;
+			var target_y = canvas_h/2;
+
+			var animate_start = false;
+			var interval,interval2;
+
+			var animate_arr = [];
+
+			canvas.width = canvas_w;
+			canvas.height = canvas_h;
+
+
+			var new_array = function(){
+				// x,y,max_y,rotate,speed,size,old_target_x,old_target_y
+				animate_arr.push([target_x,target_y,target_y-90,360*Math.random(),1.5*Math.random()+0.5,15*Math.random()+5,target_x,target_y]);
+			}
+
+			var ani = function(){
+
+				ctx.clearRect(0,0,canvas_w,canvas_h);
+
+				for(var i=0;i<animate_arr.length;i++){
+
+					ctx.save();
+					ctx.translate(animate_arr[i][6],animate_arr[i][7]);
+					ctx.rotate(Math.PI/180*animate_arr[i][3]);
+					ctx.translate(-animate_arr[i][6],-animate_arr[i][7]);
+
+					// ctx.fillStyle = "red";
+					// ctx.fillRect(animate_arr[i][0]-10, animate_arr[i][1]-10,20,20);
+
+					ctx.drawImage(ani_img, animate_arr[i][0]-animate_arr[i][5]/2, animate_arr[i][1]-animate_arr[i][5]/2,animate_arr[i][5],animate_arr[i][5]);
+
+					animate_arr[i][1] -= animate_arr[i][4];
+
+					if(animate_arr[i][1] < animate_arr[i][2]){
+						animate_arr.splice(i,1);
+					}
+
+					ctx.restore();
+
+				}
+
+				if(animate_arr.length > 0){
+					window.requestAnimationFrame(ani);
+				}else{
+					ctx.clearRect(0,0,canvas_w,canvas_h);
+					canvas.style.display="none";
+					animate_start = false;
+				}
+			}
+
+			// canvas.onmousedown = function(){
+			// 	if(!animate_start){
+			// 		new_array(); //先生成一个数据，避免判断animate_arr.length的时候造成程序终止
+			// 		window.requestAnimationFrame(ani);
+			// 		interval = setInterval(new_array,100);
+			// 		animate_start = true;
+			// 	}else{
+			// 		interval = setInterval(new_array,100);
+			// 	}
+			// }
+
+			// canvas.onmouseup = function(){
+			// 	clearInterval(interval);
+			// }
+
+			document.ontouchmove = function(event){
+				var touch = event.touches[0];
+				target_x = Number(touch.pageX);
+				target_y = Number(touch.pageY);
+			}
+
+			document.ontouchend = function(){
+				clearInterval(interval);
+
+				clearTimeout(interval2); //长按计时器
+			}
+
+			document.ontouchstart = function(event){
+
+
+
+				var _event = event;
+
+				interval2 = setTimeout(function(){
+					var touch = _event.touches[0];
+					target_x = Number(touch.pageX);
+					target_y = Number(touch.pageY);
+					canvas.style.display="block";
+					if(!animate_start){
+						new_array(); //先生成一个数据，避免判断animate_arr.length的时候造成程序终止
+						window.requestAnimationFrame(ani);
+						interval = setInterval(new_array,100);
+						animate_start = true;
+					}else{
+						interval = setInterval(new_array,100);
+					}
+				},500);
+
+			}
+
+		}
+	</script>
+	<style>
+		*{ padding: 0; margin: 0; }
+		html,body{ height: 100%; }
+	</style>
+</head>
+<body>
+	<canvas id="canvas" style="background:#000; position: absolute; top: 0; left: 0;"></canvas>
+</body>
+</html>
